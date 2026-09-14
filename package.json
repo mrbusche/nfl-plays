@@ -1,0 +1,13 @@
+{
+  "name": "nfl-plays",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "8.3.0"
+  }
+}
