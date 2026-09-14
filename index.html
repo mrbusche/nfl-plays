@@ -472,8 +472,20 @@
           return;
         }
 
+        // Remove consecutive duplicate plays (same text/matchup/clock reported twice in a row)
+        const dedupedPlays = plays.filter((play, index) => {
+          if (index === 0) return true;
+          const prev = plays[index - 1];
+          return !(
+            play.text === prev.text &&
+            play.matchup === prev.matchup &&
+            play.period === prev.period &&
+            play.clock === prev.clock
+          );
+        });
+
         // Limit to latest 75 plays for fast rendering
-        const recentPlays = plays.slice(0, 75);
+        const recentPlays = dedupedPlays.slice(0, 75);
 
         feed.innerHTML = recentPlays
           .map((play) => {
@@ -512,6 +524,10 @@
       function startPolling() {
         fetchLivePlays();
         timerInterval = setInterval(() => {
+          // Skip ticking/fetching while the tab is in the background
+          if (document.hidden) {
+            return;
+          }
           countdown--;
           document.getElementById('poll-timer').innerText = `Next: ${countdown}s`;
           if (countdown <= 0) {
@@ -519,6 +535,16 @@
           }
         }, 1000);
       }
+
+      // Pause updates when the tab isn't visible, resync immediately when it becomes active again
+      document.addEventListener('visibilitychange', () => {
+        const statusText = document.getElementById('engine-status');
+        if (document.hidden) {
+          statusText.innerText = 'Paused (tab inactive)';
+        } else {
+          fetchLivePlays();
+        }
+      });
 
       startPolling();
     </script>
