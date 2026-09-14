@@ -187,7 +187,7 @@ function renderFeed(plays) {
 
 function startPolling() {
   fetchLivePlays();
-  timerInterval = setInterval(() => {
+  setInterval(() => {
     if (document.hidden) {
       return;
     }
