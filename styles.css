@@ -163,11 +163,12 @@ button:hover {
 }
 
 .play-card.new-play {
-  animation: highlight 1.5s ease-out;
+  animation: highlight 4.5s ease-out;
 }
 
 @keyframes highlight {
-  0% {
+  0%,
+  66.667% {
     border-color: var(--accent);
     background: #1e3a5f;
   }
