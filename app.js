@@ -1,40 +1,8 @@
+import { getPlayBadge, normalizePlay } from './play-utils.js';
+
 const POLL_INTERVAL_SEC = 30;
 let countdown = POLL_INTERVAL_SEC;
 const knownPlayIds = new Set();
-
-function isKickoffOrPunt(play) {
-  const text = (play.text || '').toLowerCase();
-  const playType = (play.type?.text || '').toLowerCase();
-
-  if (
-    text.includes('kicks off') ||
-    text.includes('kickoff') ||
-    text.includes('onside kick') ||
-    text.includes('punts for') ||
-    text.includes('punt') ||
-    text.includes('end quarter')
-  ) {
-    return true;
-  }
-
-  return playType.includes('punt') || playType.includes('kickoff');
-}
-
-function calculateChronologicalWeight(play) {
-  if (play.wallclock) {
-    return new Date(play.wallclock).getTime();
-  }
-
-  const period = play.period?.number || 1;
-  const clockSeconds = parseClockToSeconds(play.clock?.displayValue || '00:00');
-  return (period - 1) * 15 * 60 + (15 * 60 - clockSeconds);
-}
-
-function parseClockToSeconds(clockStr) {
-  const parts = clockStr.split(':').map(Number);
-  if (parts.length === 2) return parts[0] * 60 + parts[1];
-  return 0;
-}
 
 async function fetchLivePlays() {
   countdown = POLL_INTERVAL_SEC;
@@ -88,23 +56,12 @@ async function fetchLivePlays() {
 
       drives.forEach((drive) => {
         (drive.plays || []).forEach((play) => {
-          if (isKickoffOrPunt(play)) {
-            return;
-          }
-
-          allFilteredPlays.push({
-            id: play.id || `${game.id}-${play.sequenceNumber || Math.random()}`,
-            text: play.text,
-            downDistanceText: play.downDistanceText || '',
-            period: play.period?.number || 1,
-            clock: play.clock?.displayValue || '',
-            statYardage: play.statYardage || 0,
-            type: play.type?.text || 'Play',
+          const normalizedPlay = normalizePlay(play, {
+            id: game.id,
             matchup: matchupStr,
             score: scoreStr,
-            chronologicalWeight: calculateChronologicalWeight(play),
-            isScoring: play.scoringPlay || false,
           });
+          if (normalizedPlay) allFilteredPlays.push(normalizedPlay);
         });
       });
     });
@@ -158,15 +115,10 @@ function renderFeed(plays) {
       const isNew = !knownPlayIds.has(play.id);
       knownPlayIds.add(play.id);
 
-      let badgeHtml = `<span class="badge badge-play">${play.type}</span>`;
-      const txt = play.text.toLowerCase();
-      if (txt.includes('touchdown')) {
-        badgeHtml = `<span class="badge badge-td">TOUCHDOWN</span>`;
-      } else if (txt.includes('intercepted') || txt.includes('fumble recovered')) {
-        badgeHtml = `<span class="badge badge-turnover">TURNOVER</span>`;
-      } else if (txt.includes('field goal is good')) {
-        badgeHtml = `<span class="badge badge-fg">FIELD GOAL</span>`;
-      }
+      const badge = getPlayBadge(play.text, play.type);
+      const badgeClass =
+        badge === 'TOUCHDOWN' ? 'badge-td' : badge === 'TURNOVER' ? 'badge-turnover' : badge === 'FIELD GOAL' ? 'badge-fg' : 'badge-play';
+      const badgeHtml = `<span class="badge ${badgeClass}">${badge}</span>`;
 
       return `
         <article class="play-card ${isNew ? 'new-play' : ''}">
