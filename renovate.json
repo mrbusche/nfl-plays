@@ -1,6 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ]
+  "timezone": "America/Chicago",
+  "schedule": ["on friday after 9am and before 5pm"],
+  "extends": ["config:recommended"],
+  "assignees": ["@mrbusche"],
+  "ignoreUnstable": false
 }
