@@ -18,6 +18,10 @@ export function isPenalty(play) {
   return (play.text || '').toLowerCase().includes('penalty');
 }
 
+export function isIncompletePass(play) {
+  return /\bpass\s+incomplete\b/i.test(play.text || '');
+}
+
 export function cleanPlayText(text) {
   return text.replace(/\s*\([^)]*\)/g, '').trim();
 }
@@ -39,7 +43,7 @@ export function calculateChronologicalWeight(play) {
 }
 
 export function normalizePlay(play, game) {
-  if (isKickoffOrPunt(play) || isPenalty(play)) return null;
+  if (isKickoffOrPunt(play) || isPenalty(play) || isIncompletePass(play)) return null;
 
   return {
     id: play.id || `${game.id}-${play.sequenceNumber || 'unknown'}`,
