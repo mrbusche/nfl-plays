@@ -116,8 +116,20 @@ function renderFeed(plays) {
       knownPlayIds.add(play.id);
 
       const badge = getPlayBadge(play.text, play.type);
-      const badgeClass =
-        badge === 'TOUCHDOWN' ? 'badge-td' : badge === 'TURNOVER' ? 'badge-turnover' : badge === 'FIELD GOAL' ? 'badge-fg' : 'badge-play';
+      let badgeClass;
+      switch (badge) {
+        case 'TOUCHDOWN':
+          badgeClass = 'badge-td';
+          break;
+        case 'TURNOVER':
+          badgeClass = 'badge-turnover';
+          break;
+        case 'FIELD GOAL':
+          badgeClass = 'badge-fg';
+          break;
+        default:
+          badgeClass = 'badge-play';
+      }
       const badgeHtml = `<span class="badge ${badgeClass}">${badge}</span>`;
 
       return `
