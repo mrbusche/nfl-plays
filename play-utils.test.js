@@ -48,13 +48,13 @@ describe('penalty filtering', () => {
 });
 
 describe('incomplete pass filtering', () => {
-  it.each([
-    'P.Mahomes pass incomplete short right to C.Allen.',
-    'B.Nix pass incomplete short right to P.Bryant.',
-  ])('identifies "%s" as an incomplete pass', (text) => {
-    expect(isIncompletePass({ text })).toBe(true);
-    expect(normalizePlay({ id: 'incomplete-1', text }, { id: 'game-1' })).toBeNull();
-  });
+  it.each(['P.Mahomes pass incomplete short right to C.Allen.', 'B.Nix pass incomplete short right to P.Bryant.'])(
+    'identifies "%s" as an incomplete pass',
+    (text) => {
+      expect(isIncompletePass({ text })).toBe(true);
+      expect(normalizePlay({ id: 'incomplete-1', text }, { id: 'game-1' })).toBeNull();
+    },
+  );
 
   it('keeps completed passes', () => {
     expect(isIncompletePass({ text: 'P.Mahomes pass short right to C.Allen for 8 yards.' })).toBe(false);
